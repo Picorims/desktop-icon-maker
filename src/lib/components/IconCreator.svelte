@@ -31,6 +31,7 @@
     let backgroundColor = "#000000";
     let strokeColor = "#ffffff";
     let opacity = 1;
+    let padding = 8;
     let cachedImg: HTMLImageElement | null = null;
 
     function refresh() {
@@ -70,7 +71,7 @@
             ctx.save();
             ctx.fillStyle = "transparent";
             ctx.globalAlpha = 1;
-            ctx.drawImage(img, 0, 0, size, size);
+            ctx.drawImage(img, padding, padding, size - 2*padding, size - 2*padding);
             ctx.restore();
         }
 
@@ -79,6 +80,9 @@
         img.addEventListener("load", drawImg);
     }
 
+    $: if (size < 8) size = 8;
+    $: if (padding < 0) padding = 0;
+    $: if (padding > (size/2 - 8)) padding = size/2 - 8;
     $: {
         if (canvas) {
             canvas.width = size;
@@ -95,7 +99,7 @@
         <div>
             <label>
                 Size:
-                <input type="number" bind:value={size} on:input={refresh}>
+                <input type="number" min="8" bind:value={size} on:input={refresh}>
             </label>
             <div class="button-list">
                 {#each defaultSizes as defaultSize}
@@ -122,6 +126,12 @@
                 Opacity:
                 <input type="range" min="0" max="1" step="0.01" bind:value={opacity} on:input={refresh}>
                 <span>{opacity}</span>
+            </label>
+        </div>
+        <div>
+            <label>
+                Padding:
+                <input type="number" min="0" bind:value={padding} on:input={refresh}>
             </label>
         </div>
         <button on:click={refresh} class="g-margin">Force refresh</button>
