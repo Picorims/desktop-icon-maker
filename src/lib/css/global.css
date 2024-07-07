@@ -1,3 +1,24 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2024 Charly Schmidt alias Picorims<picorims.contact@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the “Software”), to deal in the Software without restriction
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 * {
     margin: 0;
     padding: 0;
@@ -68,6 +89,7 @@
         --accent-900: #280033;
         --accent-950: #140019;
 
+        --error: #cc3939;
     }
 }
 
@@ -133,31 +155,183 @@
         --accent-900: #f4ccff;
         --accent-950: #f9e6ff;
 
+        --error: #f56d6d;
     }
 }
 
-
 body {
-    background-color: var(--background-50);
+    background-color: var(--background-100);
     color: var(--text-950);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    --border-radius: 4px;
+    font-size: 1.1rem;
 }
 
-body > main {
+body>main {
     flex: 1 1 auto;
+}
+
+header,
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: var(--background-200);
+}
+
+main {
+    padding: 2rem;
+    margin: auto;
+    max-width: 1280px;
+}
+
+h2 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+p {
+    margin: 0.5rem 0;
+}
+
+.feedback {
+    color: var(--error);
+    font-weight: bold;
 }
 
 a {
     color: var(--accent-700);
 }
 
-textarea {
-    background-color: var(--background-100);
+label {
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+fieldset {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    padding-top: 0;
+    border: 1px solid var(--background-500);
+}
+
+fieldset>legend {
+    font-size: 1.2rem;
+    font-weight: bold;
     color: var(--text-900);
-    border : 1px solid var(--background-500);
-    border-radius: 4px;
+    padding: 0.5rem;
+}
+
+textarea,
+input:not([type="range"]) {
+    background-color: var(--background-200);
+    color: var(--text-900);
+    border: 1px solid var(--background-500);
+    border-radius: var(--border-radius);
     padding: 0.5rem;
     margin: 0.5rem 0;
+    font-size: 1rem;
+}
+
+label>input {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+button {
+    margin-right: 0.5rem;
+    background-color: var(--secondary-200);
+    color: var(--secondary-950);
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+button.g-margin {
+    margin-top: 0.5rem;
+}
+
+button:hover {
+    background-color: var(--secondary-300);
+    cursor: pointer;
+}
+
+button:active {
+    background-color: var(--secondary-400);
+}
+
+
+
+
+
+/* input range */
+
+/*********** Baseline, reset styles ***********/
+input[type="range"] {
+    --range-track-color: var(--background-200);
+    --range-thumb-color: var(--background-500);
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    width: 25rem;
+}
+
+/* Removes default focus */
+input[type="range"]:focus {
+    outline: none;
+}
+
+/******** Chrome, Safari, Opera and Edge Chromium styles ********/
+/* slider track */
+input[type="range"]::-webkit-slider-runnable-track {
+    background-color: var(--range-track-color);
+    border-radius: 0.5rem;
+    height: 0.5rem;
+}
+
+/* slider thumb */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    /* Override default look */
+    appearance: none;
+    margin-top: -4px;
+    /* Centers thumb on the track */
+    background-color: var(--range-thumb-color);
+    border-radius: 0.5rem;
+    height: 1rem;
+    width: 1rem;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+    outline: 3px solid var(--range-thumb-color);
+    outline-offset: 0.125rem;
+}
+
+/*********** Firefox styles ***********/
+/* slider track */
+input[type="range"]::-moz-range-track {
+    background-color: var(--range-track-color);
+    border-radius: 0.5rem;
+    height: 0.5rem;
+}
+
+/* slider thumb */
+input[type="range"]::-moz-range-thumb {
+    background-color: var(--range-thumb-color);
+    border: none;
+    /*Removes extra border that FF applies*/
+    border-radius: 0.5rem;
+    height: 1rem;
+    width: 1rem;
+}
+
+input[type="range"]:focus::-moz-range-thumb {
+    outline: 3px solid var(--range-thumb-color);
+    outline-offset: 0.125rem;
 }

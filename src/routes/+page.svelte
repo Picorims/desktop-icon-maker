@@ -20,11 +20,16 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
 
+	import IconCreator from "$lib/components/IconCreator.svelte";
+	import { rawSVGtoDataURI } from "$lib/svg";
+
     let svgText = "";
 
-    function rawSVGtoDataURI(svg: string) {
-        const svgBlob = new Blob([svg], { type: 'image/svg+xml' });
-        return URL.createObjectURL(svgBlob);
+    let svgRegExp = /^<svg.*>.*<\/svg>$/g;
+    let forbiddenRegExp = /<script>|<iframe>|<object>|<embed>|<form>|<html>/g;
+    function validSvg(svg: string) {
+        svg = svg.trim();
+        return new RegExp(svgRegExp).test(svg) && !new RegExp(forbiddenRegExp).test(svg);
     }
 </script>
 
@@ -40,7 +45,18 @@
         and choose an icon. Once you found your favorite one, export it as SVG.
     </p>
     <textarea bind:value={svgText}></textarea>
-    <img src={rawSVGtoDataURI(svgText)} alt="icon preview" class="icon-preview">
+    {#if svgText && validSvg(svgText)}
+        <img src={rawSVGtoDataURI(svgText)} alt="icon preview" class="icon-preview">
+    {:else}
+        {#if svgText}
+            <p class="feedback">Invalid SVG.</p>
+        {:else}
+            <p class="feedback">Enter an SVG above.</p>
+        {/if}
+    {/if}
+    <h2>Step2 - Create the icon</h2>
+    <p>Customize the appearance below:</p>
+    <IconCreator svgText={validSvg(svgText)? svgText.trim() : ""} />
 </main>
 
 <footer>
@@ -48,21 +64,6 @@
 </footer>
 
 <style>
-    header, footer {
-        text-align: center;
-        padding: 1rem;
-        background-color: var(--background-100);
-    }
-
-    main {
-        padding: 2rem;
-    }
-
-    h2 {
-        margin-top: 1.5rem;
-        margin-bottom: 1rem;
-    }
-
     textarea {
         width: 100%;
     }
