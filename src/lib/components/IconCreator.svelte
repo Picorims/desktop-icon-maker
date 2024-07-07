@@ -28,11 +28,31 @@
     const defaultSizes = [16, 24, 32, 48, 64, 96, 128, 256, 512];
 	let size = 64;
     let canvas: HTMLCanvasElement;
+    let backgroundCanvas: HTMLCanvasElement;
     let backgroundColor = "#000000";
     let strokeColor = "#ffffff";
     let opacity = 1;
     let padding = 8;
     let cachedImg: HTMLImageElement | null = null;
+
+    function refreshBackground() {
+        console.log("refresh background");
+        if (!backgroundCanvas) return;
+        const ctx = backgroundCanvas.getContext("2d");
+        if (!ctx) return;
+
+        // reset
+        ctx.clearRect(0, 0, size, size);
+
+        // background grid
+        const gridSize = 8;
+        for (let i = 0; i < size; i += gridSize) {
+            for (let j = 0; j < size; j += gridSize) {
+                ctx.fillStyle = ((i/gridSize + j/gridSize)%2 === 0)? "#666" : "#aaa";
+                ctx.fillRect(i, j, 8, 8);
+            }
+        }
+    }
 
     function refresh() {
         console.log("refresh");
@@ -43,14 +63,6 @@
 
         // reset
         ctx.clearRect(0, 0, size, size);
-        // background grid
-        const gridSize = 8;
-        for (let i = 0; i < size; i += gridSize) {
-            for (let j = 0; j < size; j += gridSize) {
-                ctx.fillStyle = ((i/gridSize + j/gridSize)%2 === 0)? "#666" : "#aaa";
-                ctx.fillRect(i, j, 8, 8);
-            }
-        }
 
         // icon background
         ctx.fillStyle = backgroundColor;
@@ -88,6 +100,13 @@
             canvas.width = size;
             canvas.height = size;
             refresh();
+        }
+    }
+    $: {
+        if (backgroundCanvas) {
+            backgroundCanvas.width = size;
+            backgroundCanvas.height = size;
+            refreshBackground();
         }
     }
     $: svgText && refresh();
@@ -136,7 +155,10 @@
         </div>
         <button on:click={refresh} class="g-margin">Force refresh</button>
     </fieldset>
-    <canvas bind:this={canvas}></canvas>
+    <div class="canvases" style={`width: ${size}px; height: ${size}px`}>
+        <canvas class="main-canvas" bind:this={canvas}></canvas>
+        <canvas class="background-canvas" bind:this={backgroundCanvas}></canvas>
+    </div>
 </div>
 
 <style>
@@ -153,11 +175,26 @@
     fieldset {
         max-width: 80%;
     }
+
+    div.canvases {
+        position: relative;
+        margin: 1rem auto;
+        border: 1px solid var(--background-500);
+        box-sizing: content-box;
+    }
+
 	canvas {
         display: block;
-		margin: 1rem auto;
-        border: 1px solid var(--background-500);
+        position: absolute;
+        top: 0;
+        left: 0;
 	}
+    canvas.background-canvas {
+        z-index: 0;
+    }
+    canvas.main-canvas {
+        z-index: 1;
+    }
     .button-list {
         display: inline-flex;
         max-width: 360px;
