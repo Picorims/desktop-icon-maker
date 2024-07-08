@@ -1,6 +1,7 @@
 # Desktop Icon Maker
 
 Create file icons easily using SVG Icons.
+Website: https://picorims.github.io/desktop-icon-maker/
 
 ## Developing
 
