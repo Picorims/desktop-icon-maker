@@ -42,7 +42,7 @@
 		ROUNDED = 'rounded',
 		BEZIER = 'bezier'
 	}
-	let radiusType = RadiusType.BEZIER;
+	let radiusType = RadiusType.ROUNDED;
 	let cachedImg: HTMLImageElement | null = null;
 
 	function refreshBackground() {
