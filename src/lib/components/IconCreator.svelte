@@ -227,9 +227,11 @@
 	.container > * {
 		flex: 0 0 auto;
 	}
-	fieldset {
-		max-width: 80%;
-	}
+    @media screen and (min-width: 640px) {
+        fieldset {
+            max-width: 80%;
+        }
+    }
 
 	div.canvases {
 		position: relative;
