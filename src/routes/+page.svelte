@@ -54,11 +54,26 @@
 </header>
 
 <main>
+    <p>
+        This tool allows you to create custom icons to use
+        in place of default directory icons.
+    </p>
+    <ul>
+        <li>
+            On <strong>Windows</strong>, right click on the directory,
+            click on "Properties", then "Customize", and "Change Icon".
+        </li>
+        <li>
+            On <strong>MacOS</strong>, follow this Apple support tutorial: <a href="https://support.apple.com/en-gb/guide/mac-help/-mchlp2313/mac" target="_blank" rel="noopener noreferrer">tutorial</a>
+        </li>
+        <li>On <strong>Linux</strong>, right click on your directory, click on "Properties", and in "Basic" tab, click on the directory image.</li>
+    </ul>
 	<h2>Step 1 - Pick an icon</h2>
 	<p>
 		Go to an icon picker, such as the
 		<a href="https://lucide.dev/icons/">Lucide icon picker</a>
-		and choose an icon. Once you found your favorite one, export it as SVG.
+		and choose an icon. Once you found your favorite one,
+        <strong>export it as SVG.</strong>
 	</p>
 	<textarea bind:value={svgText}></textarea>
 	{#if svgText && validSvg(svgText)}
