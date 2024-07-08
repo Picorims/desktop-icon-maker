@@ -30,7 +30,7 @@
     export let imgFormat: string = 'image/png';
 
 	const defaultSizes = [16, 24, 32, 48, 64, 96, 128, 256, 512];
-	let size = 64;
+	let size = 256;
 	let canvas: HTMLCanvasElement;
 	let backgroundCanvas: HTMLCanvasElement;
 	let backgroundColor = '#000000';
