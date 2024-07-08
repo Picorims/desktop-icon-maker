@@ -33,11 +33,11 @@
 	let size = 256;
 	let canvas: HTMLCanvasElement;
 	let backgroundCanvas: HTMLCanvasElement;
-	let backgroundColor = '#000000';
-	let strokeColor = '#ffffff';
+	let backgroundColor = '#222222';
+	let strokeColor = '#eeeeee';
 	let opacity = 1;
-	let padding = 8;
-	let radius = 8;
+	let padding = 32;
+	let radius = 32;
 	enum RadiusType {
 		ROUNDED = 'rounded',
 		BEZIER = 'bezier'
