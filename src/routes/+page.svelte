@@ -101,6 +101,7 @@
 
 <footer>
 	<p>MIT License - Copyright (c) 2024 Charly Schmidt alias Picorims (picorims.contact@gmail.com)</p>
+    <p><a href="http://github.com/picorims/desktop-icon-maker" target="_blank" rel="noopener noreferrer">GitHub</a></p>
 </footer>
 
 <style>
