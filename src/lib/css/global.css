@@ -226,7 +226,8 @@ fieldset>legend {
 }
 
 textarea,
-input:not([type="range"]) {
+input:not([type="range"]),
+select {
     background-color: var(--background-200);
     color: var(--text-900);
     border: 1px solid var(--background-500);
