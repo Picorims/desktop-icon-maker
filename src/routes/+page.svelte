@@ -1,5 +1,5 @@
 <script lang="ts">
-    /*
+	/*
     The MIT License (MIT)
     
     Copyright (c) 2024 Charly Schmidt alias Picorims<picorims.contact@gmail.com>
@@ -20,58 +20,83 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
 
-	import IconCreator from "$lib/components/IconCreator.svelte";
-	import { rawSVGtoDataURI } from "$lib/svg";
+	import IconCreator from '$lib/components/IconCreator.svelte';
+	import OptionEntry from '$lib/components/OptionEntry.svelte';
+	import { rawSVGtoDataURI } from '$lib/svg';
 
-    let svgText = "";
+	let svgText = '';
 
-    let svgRegExp = /^<svg.*>.*<\/svg>$/g;
-    let forbiddenRegExp = /<script>|<iframe>|<object>|<embed>|<form>|<html>/g;
-    function validSvg(svg: string) {
-        svg = svg.trim();
-        return new RegExp(svgRegExp).test(svg) && !new RegExp(forbiddenRegExp).test(svg);
+	let svgRegExp = /^<svg.*>.*<\/svg>$/g;
+	let forbiddenRegExp = /<script>|<iframe>|<object>|<embed>|<form>|<html>/g;
+	function validSvg(svg: string) {
+		svg = svg.trim();
+		return new RegExp(svgRegExp).test(svg) && !new RegExp(forbiddenRegExp).test(svg);
+	}
+
+	enum Format {
+		PNG = 'image/png',
+		JPG = 'image/jpeg'
+	}
+    let format = Format.PNG;
+    let blob: Blob;
+
+    function exportIcon() {
+        if (!blob) return;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'icon.' + format.split('/')[1];
+        a.click();
     }
 </script>
 
 <header>
-    <h1>Desktop Icon Maker</h1>
+	<h1>Desktop Icon Maker</h1>
 </header>
 
 <main>
-    <h2>Step1 - Pick an icon</h2>
-    <p>
-        Go to an icon picker, such as the
-        <a href="https://lucide.dev/icons/">Lucide icon picker</a>
-        and choose an icon. Once you found your favorite one, export it as SVG.
-    </p>
-    <textarea bind:value={svgText}></textarea>
-    {#if svgText && validSvg(svgText)}
-        <img src={rawSVGtoDataURI(svgText)} alt="icon preview" class="icon-preview">
-    {:else}
-        {#if svgText}
-            <p class="feedback">Invalid SVG.</p>
-        {:else}
-            <p class="feedback">Enter an SVG above.</p>
-        {/if}
-    {/if}
-    <h2>Step2 - Create the icon</h2>
-    <p>Customize the appearance below:</p>
-    <IconCreator svgText={validSvg(svgText)? svgText.trim() : ""} />
+	<h2>Step 1 - Pick an icon</h2>
+	<p>
+		Go to an icon picker, such as the
+		<a href="https://lucide.dev/icons/">Lucide icon picker</a>
+		and choose an icon. Once you found your favorite one, export it as SVG.
+	</p>
+	<textarea bind:value={svgText}></textarea>
+	{#if svgText && validSvg(svgText)}
+		<img src={rawSVGtoDataURI(svgText)} alt="icon preview" class="icon-preview" />
+	{:else if svgText}
+		<p class="feedback">Invalid SVG.</p>
+	{:else}
+		<p class="feedback">Enter an SVG above.</p>
+	{/if}
+
+	<h2>Step 2 - Create the icon</h2>
+	<p>Customize the appearance below:</p>
+	<IconCreator svgText={validSvg(svgText) ? svgText.trim() : ''} imgFormat={format} onRefresh={(b) => blob = b} />
+
+	<h2>Step 3 - Export in the desired format</h2>
+	<OptionEntry>
+		<span slot="title">Format: </span>
+		<select slot="content" bind:value={format}>
+			<option value={Format.PNG}>.png</option>
+			<option value={Format.JPG}>.jpg/.jpeg</option>
+		</select>
+	</OptionEntry>
+    <button class="g-accent" on:click={exportIcon}>Export</button>
 </main>
 
 <footer>
-    <p>MIT License - Copyright (c) 2024 Charly Schmidt alias Picorims (picorims.contact@gmail.com)</p>
+	<p>MIT License - Copyright (c) 2024 Charly Schmidt alias Picorims (picorims.contact@gmail.com)</p>
 </footer>
 
 <style>
-    textarea {
-        width: 100%;
-    }
+	textarea {
+		width: 100%;
+	}
 
-    img.icon-preview {
-        width: 128px;
-        height: auto;
-        background-color: var(--background-500);
-        border-radius: 4px;
-    }
+	img.icon-preview {
+		width: 128px;
+		height: auto;
+		background-color: var(--background-500);
+		border-radius: 4px;
+	}
 </style>

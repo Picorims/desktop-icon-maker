@@ -26,6 +26,9 @@
 	import OptionEntry from './OptionEntry.svelte';
 
 	export let svgText: string = '';
+    export let onRefresh: (blob: Blob) => void;
+    export let imgFormat: string = 'image/png';
+
 	const defaultSizes = [16, 24, 32, 48, 64, 96, 128, 256, 512];
 	let size = 64;
 	let canvas: HTMLCanvasElement;
@@ -130,6 +133,9 @@
 			ctx.globalAlpha = 1;
 			ctx.drawImage(img, padding, padding, size - 2 * padding, size - 2 * padding);
 			ctx.restore();
+            const blob = canvas.toBlob((blob) => {
+                if (blob) onRefresh(blob);
+            }, imgFormat);
             drawing = false;
 		};
 

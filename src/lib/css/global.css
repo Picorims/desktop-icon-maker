@@ -257,6 +257,17 @@ button.g-margin {
     margin-top: 0.5rem;
 }
 
+button.g-accent {
+    background-color: var(--accent-300);
+    color: var(--accent-950);
+}
+button.g-accent:hover {
+    background-color: var(--accent-400);
+}
+button.g-accent:active {
+    background-color: var(--accent-500);
+}
+
 button:hover {
     background-color: var(--secondary-300);
     cursor: pointer;
