@@ -36,6 +36,32 @@
 	let lastSvgText = '';
 	let lastImg: HTMLImageElement | null = null;
 
+	function importConfig() {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = '.json';
+		input.addEventListener('change', async () => {
+			console.log("import config");
+			const file = input.files?.[0];
+			if (!file) return;
+			const text = await file.text();
+			const data = JSON.parse(text);
+			config.set(data);
+		});
+		input.click();
+	}
+
+	function exportConfig() {
+		console.log("export config");
+		const data = JSON.stringify($config);
+		const blob = new Blob([data], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = "config.json";
+		a.click();
+	}
+
 	function refreshBackground() {
 		console.log('refresh background');
 		if (!backgroundCanvas) return;
@@ -200,6 +226,17 @@
 <div class="container">
 	<fieldset>
 		<legend>Configuration</legend>
+		<OptionEntry title="Import">
+			<span slot="content">
+				<button on:click={importConfig}>Import</button>
+			</span>
+		</OptionEntry>
+		<OptionEntry title="Export">
+			<span slot="content">
+				<button on:click={exportConfig}>Export</button>
+			</span>
+		</OptionEntry>
+		
 		<OptionEntry title="Size">
 			<input slot="content" type="number" min="8" bind:value={$config.size} />
 			<div slot="additional" class="button-list">
