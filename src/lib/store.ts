@@ -33,6 +33,6 @@ export const config = writable<Config>({
     strokeColor: "#eeeeee",
     opacity: 1,
     padding: 0,
-    radius: 16,
+    radius: 32,
     radiusType: RadiusType.ROUNDED,
 });
