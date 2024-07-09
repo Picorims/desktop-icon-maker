@@ -314,8 +314,9 @@ input[type="range"] {
     appearance: none;
     background: transparent;
     cursor: pointer;
-    width: 25rem;
+    width: 100%;
     min-width: 0;
+    margin: 0.5rem 0;
 }
 
 /* Removes default focus */

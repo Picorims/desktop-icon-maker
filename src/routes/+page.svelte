@@ -89,8 +89,7 @@
 	<IconCreator svgText={validSvg(svgText) ? svgText.trim() : ''} imgFormat={format} onRefresh={(b) => blob = b} />
 
 	<h2>Step 3 - Export in the desired format</h2>
-	<OptionEntry>
-		<span slot="title">Format: </span>
+	<OptionEntry title="Format" noBorder>
 		<select slot="content" bind:value={format}>
 			<option value={Format.PNG}>.png</option>
 			<option value={Format.JPG}>.jpg/.jpeg</option>

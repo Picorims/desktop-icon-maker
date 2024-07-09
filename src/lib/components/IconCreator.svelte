@@ -169,8 +169,7 @@
 <div class="container">
 	<fieldset>
 		<legend>Configuration</legend>
-		<OptionEntry>
-			<span slot="title">Size:</span>
+		<OptionEntry title="Size">
 			<input slot="content" type="number" min="8" bind:value={size} on:input={refresh} />
 			<div slot="additional" class="button-list">
 				{#each defaultSizes as defaultSize}
@@ -178,31 +177,31 @@
 				{/each}
 			</div>
 		</OptionEntry>
-		<OptionEntry>
-			<span slot="title">Background color:</span>
+
+		<OptionEntry title="Background color">
 			<input slot="content" type="color" bind:value={backgroundColor} on:input={refresh} />
 			<span slot="suffix">{backgroundColor}</span>
 		</OptionEntry>
-		<OptionEntry>
-			<span slot="title">Icon stroke color:</span>
+		
+		<OptionEntry title="Icon stroke color">
 			<input slot="content" type="color" bind:value={strokeColor} on:input={refresh} />
 			<span slot="suffix">{strokeColor}</span>
 		</OptionEntry>
-		<OptionEntry>
-			<span slot="title">Opacity:</span>
+
+		<OptionEntry title="Opacity">
 			<input slot="content" type="range" min="0" max="1" step="0.01" bind:value={opacity} on:input={refresh} />
 			<span slot="suffix">{opacity}</span>
 		</OptionEntry>
-		<OptionEntry>
-			<span slot="title">Padding:</span>
+
+		<OptionEntry title="Padding">
 			<input slot="content" type="number" min="0" bind:value={padding} on:input={refresh} />
 		</OptionEntry>
-		<OptionEntry>
-			<span slot="title">Radius:</span>
+
+		<OptionEntry title="Radius">
 			<input slot="content" type="number" min="0" bind:value={radius} on:input={refresh} />
 		</OptionEntry>
-		<OptionEntry>
-            <span slot="title">Radius type:</span>
+		
+		<OptionEntry title="Radius type">
             <select slot="content" bind:value={radiusType} on:change={refresh}>
                 <option value={RadiusType.BEZIER}>Bezier</option>
                 <option value={RadiusType.ROUNDED}>Rounded</option>
