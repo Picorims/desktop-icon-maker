@@ -18,9 +18,12 @@ export enum RadiusType {
 	BEZIER = 'bezier'
 }
 
+export const icoSizes = [16, 20, 24, 32, 40, 48, 64, 128, 256];
+
 export	enum Format {
     PNG = 'image/png',
-    JPG = 'image/jpeg'
+    JPG = 'image/jpeg',
+    ICO = 'image/x-icon',
 }
 
 

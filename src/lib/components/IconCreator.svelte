@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { rawSVGtoDataURI } from '$lib/svg';
-	import { text } from '@sveltejs/kit';
 	/*
     The MIT License (MIT)
     
@@ -21,8 +19,7 @@
     DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
-	import chroma from 'chroma-js';
-	import { draw } from 'svelte/transition';
+	import { rawSVGtoDataURI } from '$lib/svg';
 	import OptionEntry from './OptionEntry.svelte';
 	import { config, Format, RadiusType, type Config } from '$lib/store';
 
@@ -236,7 +233,7 @@
 				<button on:click={exportConfig}>Export</button>
 			</span>
 		</OptionEntry>
-		
+
 		<OptionEntry title="Size">
 			<input slot="content" type="number" min="8" bind:value={$config.size} />
 			<div slot="additional" class="button-list">
