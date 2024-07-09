@@ -24,25 +24,15 @@
 	import chroma from 'chroma-js';
 	import { draw } from 'svelte/transition';
 	import OptionEntry from './OptionEntry.svelte';
+	import { config, Format, RadiusType, type Config } from '$lib/store';
 
 	export let svgText: string = '';
-    export let onRefresh: (blob: Blob) => void;
-    export let imgFormat: string = 'image/png';
+	export let onRefresh: (blob: Blob) => void;
+	export let imgFormat: Format = Format.PNG;
 
 	const defaultSizes = [16, 24, 32, 48, 64, 96, 128, 256, 512];
-	let size = 256;
 	let canvas: HTMLCanvasElement;
 	let backgroundCanvas: HTMLCanvasElement;
-	let backgroundColor = '#222222';
-	let strokeColor = '#eeeeee';
-	let opacity = 1;
-	let padding = 32;
-	let radius = 32;
-	enum RadiusType {
-		ROUNDED = 'rounded',
-		BEZIER = 'bezier'
-	}
-	let radiusType = RadiusType.ROUNDED;
 	let cachedImg: HTMLImageElement | null = null;
 
 	function refreshBackground() {
@@ -50,6 +40,7 @@
 		if (!backgroundCanvas) return;
 		const ctx = backgroundCanvas.getContext('2d');
 		if (!ctx) return;
+		const size = $config.size;
 
 		// reset
 		ctx.clearRect(0, 0, size, size);
@@ -69,7 +60,7 @@
 	 * configured radius and size
 	 * @param ctx
 	 */
-	function roundedRectBezier(ctx: CanvasRenderingContext2D) {
+	function roundedRectBezier(ctx: CanvasRenderingContext2D, size: number, radius: number) {
 		ctx.beginPath();
 		ctx.moveTo(radius, 0);
 		ctx.lineTo(size - radius, 0);
@@ -83,37 +74,39 @@
 		ctx.closePath();
 	}
 
-    let drawing = false;
-	function refresh() {
-        if (drawing) {
-            console.log('already drawing');
-            return;
-        };
+	let drawing = false;
+	function refresh(config: Config) {
+		if (drawing) {
+			console.log('already drawing');
+			return;
+		}
 		console.log('refresh');
 		if (svgText === '') return;
 		if (!canvas) return;
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
-        
-        drawing = true;
+
+		drawing = true;
 		// reset
-		ctx.clearRect(0, 0, size, size);
+		ctx.clearRect(0, 0, config.size, config.size);
 
 		// icon background
-		ctx.fillStyle = backgroundColor;
-		ctx.globalAlpha = opacity;
-        if (radiusType === RadiusType.ROUNDED && !ctx.roundRect) {
-            alert('It looks like your browser does not support the roundRect method. Bezier will be used instead.');
-            radiusType = RadiusType.BEZIER;
-        }
-		if (radiusType === RadiusType.ROUNDED) {
-            ctx.beginPath();
-            ctx.roundRect(0, 0, size, size, radius);
-            ctx.fill();
-            console.log("r");
-        } else if (radiusType === RadiusType.BEZIER) {
-			console.log("b");
-            roundedRectBezier(ctx);
+		ctx.fillStyle = config.backgroundColor;
+		ctx.globalAlpha = config.opacity;
+		if (config.radiusType === RadiusType.ROUNDED && !ctx.roundRect) {
+			alert(
+				'It looks like your browser does not support the roundRect method. Bezier will be used instead.'
+			);
+			$config.radiusType = RadiusType.BEZIER;
+		}
+		if (config.radiusType === RadiusType.ROUNDED) {
+			ctx.beginPath();
+			ctx.roundRect(0, 0, config.size, config.size, config.radius);
+			ctx.fill();
+			console.log('r');
+		} else if (config.radiusType === RadiusType.BEZIER) {
+			console.log('b');
+			roundedRectBezier(ctx, config.size, config.radius);
 		}
 		ctx.fill();
 
@@ -121,22 +114,30 @@
 		const parser = new DOMParser();
 		const svg = parser.parseFromString(svgText, 'image/svg+xml').querySelector('svg');
 		if (!svg) return;
-		svg.setAttribute('stroke', strokeColor);
+		svg.setAttribute('stroke', config.strokeColor);
 		const uri = rawSVGtoDataURI(svg.outerHTML);
-		const img = new Image(size, size);
+		const img = new Image(config.size, config.size);
 		img.src = uri;
 
+		const configCopy = { ...config };
+
 		const drawImg = () => {
-            console.log('draw img');
+			console.log('draw img');
 			ctx.save();
 			ctx.fillStyle = 'transparent';
 			ctx.globalAlpha = 1;
-			ctx.drawImage(img, padding, padding, size - 2 * padding, size - 2 * padding);
+			ctx.drawImage(
+				img,
+				configCopy.padding,
+				configCopy.padding,
+				configCopy.size - 2 * configCopy.padding,
+				configCopy.size - 2 * configCopy.padding
+			);
 			ctx.restore();
-            const blob = canvas.toBlob((blob) => {
-                if (blob) onRefresh(blob);
-            }, imgFormat);
-            drawing = false;
+			const blob = canvas.toBlob((blob) => {
+				if (blob) onRefresh(blob);
+			}, imgFormat);
+			drawing = false;
 		};
 
 		// if (cachedImg) cachedImg.removeEventListener('load', drawImg);
@@ -144,72 +145,75 @@
 		img.addEventListener('load', drawImg);
 	}
 
-	$: if (size < 8) size = 8;
-	$: if (padding < 0) padding = 0;
-	$: if (padding > size / 2 - 8) padding = size / 2 - 8;
-	$: if (radius < 0) radius = 0;
-    $: if (radius > size / 2) radius = size / 2;
+	$: if ($config.size < 8) $config.size = 8;
+	$: if ($config.padding < 0) $config.padding = 0;
+	$: if ($config.padding > $config.size / 2 - 8) $config.padding = $config.size / 2 - 8;
+	$: if ($config.radius < 0) $config.radius = 0;
+	$: if ($config.radius > $config.size / 2) $config.radius = $config.size / 2;
 	$: {
 		if (canvas) {
-			canvas.width = size;
-			canvas.height = size;
-			refresh();
+			canvas.width = $config.size;
+			canvas.height = $config.size;
+			refresh($config);
 		}
 	}
 	$: {
 		if (backgroundCanvas) {
-			backgroundCanvas.width = size;
-			backgroundCanvas.height = size;
+			backgroundCanvas.width = $config.size;
+			backgroundCanvas.height = $config.size;
 			refreshBackground();
 		}
 	}
-	$: svgText && refresh();
+
+	$: $config.svgText = svgText;
+	$: $config.imgFormat = imgFormat;
+	$: $config && refresh($config);
 </script>
 
 <div class="container">
 	<fieldset>
 		<legend>Configuration</legend>
 		<OptionEntry title="Size">
-			<input slot="content" type="number" min="8" bind:value={size} on:input={refresh} />
+			<input slot="content" type="number" min="8" bind:value={$config.size} />
 			<div slot="additional" class="button-list">
 				{#each defaultSizes as defaultSize}
-					<button on:click={() => (size = defaultSize)}>{defaultSize}</button>
+					<button on:click={() => ($config.size = defaultSize)}>{defaultSize}</button>
 				{/each}
 			</div>
 		</OptionEntry>
 
 		<OptionEntry title="Background color">
-			<input slot="content" type="color" bind:value={backgroundColor} on:input={refresh} />
-			<span slot="suffix">{backgroundColor}</span>
+			<input slot="content" type="color" bind:value={$config.backgroundColor} />
+			<span slot="suffix">{$config.backgroundColor}</span>
 		</OptionEntry>
-		
+
 		<OptionEntry title="Icon stroke color">
-			<input slot="content" type="color" bind:value={strokeColor} on:input={refresh} />
-			<span slot="suffix">{strokeColor}</span>
+			<input slot="content" type="color" bind:value={$config.strokeColor} />
+			<span slot="suffix">{$config.strokeColor}</span>
 		</OptionEntry>
 
 		<OptionEntry title="Opacity">
-			<input slot="content" type="range" min="0" max="1" step="0.01" bind:value={opacity} on:input={refresh} />
-			<span slot="suffix">{opacity}</span>
+			<input slot="content" type="range" min="0" max="1" step="0.01" bind:value={$config.opacity} />
+			<span slot="suffix">{$config.opacity}</span>
 		</OptionEntry>
 
 		<OptionEntry title="Padding">
-			<input slot="content" type="number" min="0" bind:value={padding} on:input={refresh} />
+			<input slot="content" type="number" min="0" bind:value={$config.padding} />
 		</OptionEntry>
 
 		<OptionEntry title="Radius">
-			<input slot="content" type="number" min="0" bind:value={radius} on:input={refresh} />
+			<input slot="content" type="number" min="0" bind:value={$config.radius} />
 		</OptionEntry>
-		
+
 		<OptionEntry title="Radius type">
-            <select slot="content" bind:value={radiusType} on:change={refresh}>
-                <option value={RadiusType.BEZIER}>Bezier</option>
-                <option value={RadiusType.ROUNDED}>Rounded</option>
-            </select>
-        </OptionEntry>
-		<button on:click={refresh} class="g-margin">Force refresh</button>
+			<select slot="content" bind:value={$config.radiusType}>
+				<option value={RadiusType.BEZIER}>Bezier</option>
+				<option value={RadiusType.ROUNDED}>Rounded</option>
+			</select>
+		</OptionEntry>
+		<button on:click={() => refresh($config)} class="g-margin">Force refresh</button>
 	</fieldset>
-	<div class="canvases" style={`width: ${size}px; height: ${size}px`}>
+	<div class="canvases" style={`width: ${$config.size}px; height: ${$config.size}px`}>
 		<canvas class="main-canvas" bind:this={canvas}></canvas>
 		<canvas class="background-canvas" bind:this={backgroundCanvas}></canvas>
 	</div>
@@ -226,11 +230,11 @@
 	.container > * {
 		flex: 0 0 auto;
 	}
-    @media screen and (min-width: 640px) {
-        fieldset {
-            max-width: 80%;
-        }
-    }
+	@media screen and (min-width: 640px) {
+		fieldset {
+			max-width: 80%;
+		}
+	}
 
 	div.canvases {
 		position: relative;

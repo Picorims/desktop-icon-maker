@@ -22,6 +22,7 @@
 
 	import IconCreator from '$lib/components/IconCreator.svelte';
 	import OptionEntry from '$lib/components/OptionEntry.svelte';
+	import { Format } from '$lib/store';
 	import { rawSVGtoDataURI } from '$lib/svg';
 
 	let svgText = '';
@@ -33,10 +34,6 @@
 		return new RegExp(svgRegExp).test(svg) && !new RegExp(forbiddenRegExp).test(svg);
 	}
 
-	enum Format {
-		PNG = 'image/png',
-		JPG = 'image/jpeg'
-	}
     let format = Format.PNG;
     let blob: Blob;
 
