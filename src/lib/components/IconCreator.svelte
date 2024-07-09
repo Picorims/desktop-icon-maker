@@ -33,7 +33,8 @@
 	const defaultSizes = [16, 24, 32, 48, 64, 96, 128, 256, 512];
 	let canvas: HTMLCanvasElement;
 	let backgroundCanvas: HTMLCanvasElement;
-	let cachedImg: HTMLImageElement | null = null;
+	let lastSvgText = '';
+	let lastImg: HTMLImageElement | null = null;
 
 	function refreshBackground() {
 		console.log('refresh background');
@@ -110,28 +111,41 @@
 		}
 		ctx.fill();
 
-		// icon
-		const parser = new DOMParser();
-		const svg = parser.parseFromString(svgText, 'image/svg+xml').querySelector('svg');
-		if (!svg) return;
-		svg.setAttribute('stroke', config.strokeColor);
-		const uri = rawSVGtoDataURI(svg.outerHTML);
-		const img = new Image(config.size, config.size);
-		img.src = uri;
-
 		const configCopy = { ...config };
 
 		const drawImg = () => {
+			const img = lastImg;
+			const imgSize = configCopy.size - 2 * configCopy.padding;
+			if (!img) {
+				console.warn('no img to draw');
+				drawing = false;
+				return;
+			}
 			console.log('draw img');
 			ctx.save();
 			ctx.fillStyle = 'transparent';
 			ctx.globalAlpha = 1;
+			
+			// apply color to icon
+			const tmpCanvas = document.createElement('canvas');
+			tmpCanvas.width = imgSize;
+			tmpCanvas.height = imgSize;
+			const tmpCtx = tmpCanvas.getContext('2d');
+			if (!tmpCtx) {
+				drawing = false;
+				return;
+			}
+			tmpCtx.drawImage(img, 0, 0, imgSize, imgSize);
+			tmpCtx.globalCompositeOperation = 'source-in';
+			tmpCtx.fillStyle = configCopy.strokeColor;
+			tmpCtx.fillRect(0, 0, imgSize, imgSize);
+
 			ctx.drawImage(
-				img,
+				tmpCanvas,
 				configCopy.padding,
 				configCopy.padding,
-				configCopy.size - 2 * configCopy.padding,
-				configCopy.size - 2 * configCopy.padding
+				imgSize,
+				imgSize
 			);
 			ctx.restore();
 			const blob = canvas.toBlob((blob) => {
@@ -140,9 +154,22 @@
 			drawing = false;
 		};
 
-		// if (cachedImg) cachedImg.removeEventListener('load', drawImg);
-		// cachedImg = img;
-		img.addEventListener('load', drawImg);
+		// icon
+		if (svgText === lastSvgText) {
+			drawImg();
+			return;
+		} else {
+			const parser = new DOMParser();
+			const svg = parser.parseFromString(svgText, 'image/svg+xml').querySelector('svg');
+			if (!svg) return;
+			svg.setAttribute('stroke', "#000000");
+			const uri = rawSVGtoDataURI(svg.outerHTML);
+			const img = new Image(config.size, config.size);
+			img.src = uri;
+			lastImg = img;
+			lastSvgText = svgText;
+			img.addEventListener('load', drawImg);
+		}
 	}
 
 	$: if ($config.size < 8) $config.size = 8;
