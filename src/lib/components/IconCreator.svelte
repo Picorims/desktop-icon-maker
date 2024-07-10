@@ -21,10 +21,10 @@
     */
 	import { rawSVGtoDataURI } from '$lib/svg';
 	import OptionEntry from './OptionEntry.svelte';
-	import { config, Format, RadiusType, type Config } from '$lib/store';
+	import { config, Format, RadiusType, renderer, type Config } from '$lib/store';
+	import { Renderer } from '$lib/canvas';
 
 	export let svgText: string = '';
-	export let onRefresh: (blob: Blob) => void;
 	export let imgFormat: Format = Format.PNG;
 
 	const defaultSizes = [16, 24, 32, 48, 64, 96, 128, 256, 512];
@@ -38,7 +38,7 @@
 		input.type = 'file';
 		input.accept = '.json';
 		input.addEventListener('change', async () => {
-			console.log("import config");
+			console.log('import config');
 			const file = input.files?.[0];
 			if (!file) return;
 			const text = await file.text();
@@ -49,151 +49,16 @@
 	}
 
 	function exportConfig() {
-		console.log("export config");
+		console.log('export config');
 		const data = JSON.stringify($config);
 		const blob = new Blob([data], { type: 'application/json' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = "config.json";
+		a.download = 'config.json';
 		a.click();
 	}
-
-	function refreshBackground() {
-		console.log('refresh background');
-		if (!backgroundCanvas) return;
-		const ctx = backgroundCanvas.getContext('2d');
-		if (!ctx) return;
-		const size = $config.size;
-
-		// reset
-		ctx.clearRect(0, 0, size, size);
-
-		// background grid
-		const gridSize = 8;
-		for (let i = 0; i < size; i += gridSize) {
-			for (let j = 0; j < size; j += gridSize) {
-				ctx.fillStyle = (i / gridSize + j / gridSize) % 2 === 0 ? '#666' : '#aaa';
-				ctx.fillRect(i, j, 8, 8);
-			}
-		}
-	}
-
-	/**
-	 * Draws a path representing a rounded rect based on the current
-	 * configured radius and size
-	 * @param ctx
-	 */
-	function roundedRectBezier(ctx: CanvasRenderingContext2D, size: number, radius: number) {
-		ctx.beginPath();
-		ctx.moveTo(radius, 0);
-		ctx.lineTo(size - radius, 0);
-		ctx.bezierCurveTo(size, 0, size, 0, size, radius);
-		ctx.lineTo(size, size - radius);
-		ctx.bezierCurveTo(size, size, size, size, size - radius, size);
-		ctx.lineTo(radius, size);
-		ctx.bezierCurveTo(0, size, 0, size, 0, size - radius);
-		ctx.lineTo(0, radius);
-		ctx.bezierCurveTo(0, 0, 0, 0, radius, 0);
-		ctx.closePath();
-	}
-
-	let drawing = false;
-	function refresh(config: Config) {
-		if (drawing) {
-			console.log('already drawing');
-			return;
-		}
-		console.log('refresh');
-		if (svgText === '') return;
-		if (!canvas) return;
-		const ctx = canvas.getContext('2d');
-		if (!ctx) return;
-
-		drawing = true;
-		// reset
-		ctx.clearRect(0, 0, config.size, config.size);
-
-		// icon background
-		ctx.fillStyle = config.backgroundColor;
-		ctx.globalAlpha = config.opacity;
-		if (config.radiusType === RadiusType.ROUNDED && !ctx.roundRect) {
-			alert(
-				'It looks like your browser does not support the roundRect method. Bezier will be used instead.'
-			);
-			$config.radiusType = RadiusType.BEZIER;
-		}
-		if (config.radiusType === RadiusType.ROUNDED) {
-			ctx.beginPath();
-			ctx.roundRect(0, 0, config.size, config.size, config.radius);
-			ctx.fill();
-			console.log('r');
-		} else if (config.radiusType === RadiusType.BEZIER) {
-			console.log('b');
-			roundedRectBezier(ctx, config.size, config.radius);
-		}
-		ctx.fill();
-
-		const configCopy = { ...config };
-
-		const drawImg = () => {
-			const img = lastImg;
-			const imgSize = configCopy.size - 2 * configCopy.padding;
-			if (!img) {
-				console.warn('no img to draw');
-				drawing = false;
-				return;
-			}
-			console.log('draw img');
-			ctx.save();
-			ctx.fillStyle = 'transparent';
-			ctx.globalAlpha = 1;
-			
-			// apply color to icon
-			const tmpCanvas = document.createElement('canvas');
-			tmpCanvas.width = imgSize;
-			tmpCanvas.height = imgSize;
-			const tmpCtx = tmpCanvas.getContext('2d');
-			if (!tmpCtx) {
-				drawing = false;
-				return;
-			}
-			tmpCtx.drawImage(img, 0, 0, imgSize, imgSize);
-			tmpCtx.globalCompositeOperation = 'source-in';
-			tmpCtx.fillStyle = configCopy.strokeColor;
-			tmpCtx.fillRect(0, 0, imgSize, imgSize);
-
-			ctx.drawImage(
-				tmpCanvas,
-				configCopy.padding,
-				configCopy.padding,
-				imgSize,
-				imgSize
-			);
-			ctx.restore();
-			const blob = canvas.toBlob((blob) => {
-				if (blob) onRefresh(blob);
-			}, imgFormat);
-			drawing = false;
-		};
-
-		// icon
-		if (svgText === lastSvgText) {
-			drawImg();
-			return;
-		} else {
-			const parser = new DOMParser();
-			const svg = parser.parseFromString(svgText, 'image/svg+xml').querySelector('svg');
-			if (!svg) return;
-			svg.setAttribute('stroke', "#000000");
-			const uri = rawSVGtoDataURI(svg.outerHTML);
-			const img = new Image(config.size, config.size);
-			img.src = uri;
-			lastImg = img;
-			lastSvgText = svgText;
-			img.addEventListener('load', drawImg);
-		}
-	}
+	
 
 	$: if ($config.size < 8) $config.size = 8;
 	$: if ($config.padding < 0) $config.padding = 0;
@@ -201,23 +66,18 @@
 	$: if ($config.radius < 0) $config.radius = 0;
 	$: if ($config.radius > $config.size / 2) $config.radius = $config.size / 2;
 	$: {
-		if (canvas) {
-			canvas.width = $config.size;
-			canvas.height = $config.size;
-			refresh($config);
-		}
-	}
-	$: {
-		if (backgroundCanvas) {
-			backgroundCanvas.width = $config.size;
-			backgroundCanvas.height = $config.size;
-			refreshBackground();
+		if (canvas && backgroundCanvas && !$renderer) {
+			$renderer = new Renderer({
+				canvas: canvas,
+				backgroundCanvas: backgroundCanvas,
+				config: $config,
+			});
 		}
 	}
 
 	$: $config.svgText = svgText;
 	$: $config.imgFormat = imgFormat;
-	$: $config && refresh($config);
+	$: $config && $renderer?.setConfig($config);
 </script>
 
 <div class="container">
@@ -272,7 +132,7 @@
 				<option value={RadiusType.ROUNDED}>Rounded</option>
 			</select>
 		</OptionEntry>
-		<button on:click={() => refresh($config)} class="g-margin">Force refresh</button>
+		<button on:click={() => $renderer?.forceRefresh()} class="g-margin">Force refresh</button>
 	</fieldset>
 	<div class="canvases" style={`width: ${$config.size}px; height: ${$config.size}px`}>
 		<canvas class="main-canvas" bind:this={canvas}></canvas>

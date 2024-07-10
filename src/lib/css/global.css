@@ -215,6 +215,29 @@ strong {
     color: var(--accent-500);
 }
 
+pre {
+    background-color: var(--background-200);
+    color: var(--text-900);
+    padding: 0.25rem;
+    margin: 0.25rem;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+}
+
+details {
+    border: 1px solid var(--background-500);
+    border-radius: var(--border-radius);
+    padding: 0.25rem;
+}
+summary {
+    padding: 0.25rem;
+    color: var(--text-900);
+    font-weight: bold;
+    cursor: pointer;
+    background-color: var(--secondary-200);
+    border-radius: var(--border-radius);
+}
+
 a {
     color: var(--accent-700);
 }
@@ -231,6 +254,7 @@ fieldset {
     padding: 1rem;
     padding-top: 0;
     border: 1px solid var(--background-500);
+    border-radius: var(--border-radius);
 }
 
 @media screen and (max-width: 640px){
