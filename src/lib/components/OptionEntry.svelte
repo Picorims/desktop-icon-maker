@@ -28,9 +28,6 @@
         gap: 0.5rem;
         width: 100%;
     }
-    label.row.noBorder {
-        border-top: none;
-    }
 
     label.container > * {
         flex: 0 0 auto;
